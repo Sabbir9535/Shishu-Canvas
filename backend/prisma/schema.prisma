@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum PaymentMethod {
+  COD
+  BKASH
+  NAGAD
+  ROCKET
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+
+  cartItems CartItem[]
+  orders    Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+
+  products  Product[]
+
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id          String    @id @default(cuid())
+
+  name        String
+  slug        String    @unique
+
+  description String?
+
+  price       Float
+
+  stock       Int       @default(0)
+
+  image       String?
+
+  categoryId  String
+
+  category    Category  @relation(fields: [categoryId], references: [id])
+
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CartItem {
+  id         String   @id @default(cuid())
+
+  quantity   Int      @default(1)
+
+  userId     String
+  productId  String
+
+  user        User     @relation(fields: [userId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model Lead {
+  id         String   @id @default(cuid())
+
+  name       String?
+  phone      String?
+
+  district   String?
+  area       String?
+  address    String?
+
+  cartData   Json?
+
+  createdAt  DateTime @default(now())
+}
+
+model Order {
+  id              String         @id @default(cuid())
+
+  orderNumber     String         @unique
+
+  customerName    String
+  phone           String
+
+  district        String
+  area            String
+  address         String
+
+  paymentMethod   PaymentMethod
+
+  subtotal        Float
+  deliveryCharge  Float
+  totalAmount     Float
+
+  status          OrderStatus @default(PENDING)
+
+  userId          String?
+
+  user            User? @relation(fields: [userId], references: [id])
+
+  items           OrderItem[]
+
+  createdAt       DateTime @default(now())
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+
+  orderId      String
+  productId    String
+
+  productName  String
+
+  price        Float
+
+  quantity     Int
+
+  image        String?
+
+  order        Order @relation(fields: [orderId], references: [id])
+
+  product      Product @relation(fields: [productId], references: [id])
+}
