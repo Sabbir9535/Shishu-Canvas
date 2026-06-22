@@ -2,10 +2,21 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useCartStore } from "@/store/useCartStore"; // Zustand store ইম্পোর্ট করা হলো
 
 export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Zustand থেকে Cart ডেটা এবং ফাংশন নিয়ে আসা
+  const { cart, removeFromCart } = useCartStore();
+
+  // Total items এবং Subtotal ক্যালকুলেট করা
+  const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+  const subtotal = cart.reduce((total, item) => {
+    const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
+    return total + itemPrice * item.quantity;
+  }, 0);
 
   return (
     <>
@@ -26,7 +37,7 @@ export default function Navbar() {
           {["Home", "Shop", "About Us", "Contact"].map((item) => (
             <li key={item}>
               <Link 
-                href="#" 
+                href={item === "Home" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`} 
                 className="text-[11px] font-light tracking-[0.2em] uppercase text-muted transition-colors duration-300 relative group hover:text-charcoal"
               >
                 {item}
@@ -69,9 +80,12 @@ export default function Navbar() {
               <line x1="3" y1="6" x2="21" y2="6" />
               <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose text-white text-[9px] flex items-center justify-center font-medium">
-              2
-            </span>
+            {/* ডাইনামিক কার্ট ব্যাজ */}
+            {totalItems > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose text-white text-[9px] flex items-center justify-center font-medium">
+                {totalItems}
+              </span>
+            )}
           </button>
         </div>
       </nav>
@@ -102,21 +116,68 @@ export default function Navbar() {
               <h2 className="font-serif text-2xl text-charcoal">Your Cart</h2>
               <button 
                 onClick={() => setIsCartOpen(false)}
-                className="text-muted hover:text-charcoal"
+                className="text-muted hover:text-charcoal transition-colors"
               >
                 ✕
               </button>
             </div>
             
-            <div className="flex-1 flex items-center justify-center text-muted text-sm">
-              <p>Your cart is currently empty.</p>
-            </div>
+            {/* ডাইনামিক কার্ট আইটেমস */}
+            {cart.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-muted text-sm tracking-wide">
+                <p>Your cart is currently empty.</p>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto py-6 space-y-6 custom-scrollbar">
+                {cart.map((item) => {
+                  const price = typeof item.price === "string" ? parseFloat(item.price) : item.price;
+                  return (
+                    <div key={item.id} className="flex gap-4 group">
+                      <div className="w-20 h-24 flex-shrink-0 overflow-hidden bg-cream">
+                        <img 
+                          src={item.image} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                          <h3 className="font-serif text-[15px] text-charcoal leading-tight mb-1">{item.name}</h3>
+                          <p className="text-[10px] text-muted uppercase tracking-[0.1em]">Qty: {item.quantity}</p>
+                        </div>
+                        <div className="flex justify-between items-end">
+                          <span className="text-[13px] text-charcoal tracking-wide">৳{price.toLocaleString('en-IN')}</span>
+                          <button 
+                            onClick={() => removeFromCart(item.id)} 
+                            className="text-[9px] text-muted hover:text-rose transition-colors uppercase tracking-[0.15em] border-b border-transparent hover:border-rose pb-[1px]"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             
-            <div className="pt-4 border-t border-gold/20">
-              <button className="w-full bg-charcoal text-ivory py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-rose-dark transition-colors">
-                Checkout
-              </button>
-            </div>
+            {/* Cart Footer */}
+            {cart.length > 0 && (
+              <div className="pt-6 border-t border-gold/20 bg-ivory">
+                <div className="flex justify-between text-charcoal mb-6 tracking-wide">
+                  <span className="text-sm uppercase tracking-[0.1em]">Subtotal</span>
+                  <span className="font-medium">৳{subtotal.toLocaleString('en-IN')}</span>
+                </div>
+                <Link href="/checkout" onClick={() => setIsCartOpen(false)}>
+                  <button className="w-full bg-charcoal text-ivory py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-rose-dark transition-colors duration-300">
+                    Proceed to Checkout
+                  </button>
+                </Link>
+                <Link href="/cart" onClick={() => setIsCartOpen(false)} className="block text-center mt-4 text-[10px] text-muted tracking-[0.15em] uppercase hover:text-charcoal transition-colors">
+                  View Full Cart
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
