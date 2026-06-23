@@ -1,79 +1,96 @@
-// src/app/checkout/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { useCartStore } from "@/store/useCartStore";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCartStore } from "@/store/useCartStore";
+import { createOrder } from "@/lib/api";
+import type { CheckoutFormData } from "@/types";
+import { formatCurrency } from "@/lib/format";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, clearCart } = useCartStore();
+
+  const cart = useCartStore((state) => state.cart);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const subtotal = useCartStore((state) => state.getSubtotal());
+  const totalItems = useCartStore((state) => state.getTotalItems());
+
+  const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CheckoutFormData>({
     name: "",
-    email: "",
     phone: "",
     address: "",
+    email: "",
   });
 
-  // Hydration error এড়ানোর জন্য
-  const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const subtotal = cart.reduce((total, item) => {
-    const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
-    return total + itemPrice * item.quantity;
-  }, 0);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) return "Full name is required.";
+    if (!formData.phone.trim()) return "Phone number is required.";
+    if (!formData.address.trim()) return "Address is required.";
+    if (cart.length === 0) return "Your cart is empty.";
+    return "";
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
 
-    // API এর জন্য পেলোড তৈরি করা
-    const orderData = {
-      customer: formData,
-      items: cart.map(item => ({
-        productId: item.id,
-        quantity: item.quantity,
-        price: typeof item.price === "string" ? parseFloat(item.price) : item.price
-      })),
-      totalAmount: subtotal,
-      status: "pending"
-    };
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      });
+      setIsLoading(true);
+      setError("");
 
-      if (!res.ok) {
-        throw new Error("Failed to place order. Please try again.");
-      }
+      /**
+       * IMPORTANT:
+       * তোমার DB schema অনুযায়ী orders table এ single row = single product order
+       * তাই cart এর প্রতিটা item এর জন্য আলাদা POST /api/orders যাবে
+       */
+      await Promise.all(
+        cart.map((item) =>
+          createOrder({
+            product_id: item.id,
+            customer_name: formData.name,
+            phone: formData.phone,
+            address: formData.address,
+            quantity: item.quantity,
+            status: "pending",
+          })
+        )
+      );
 
-      const data = await res.json();
-      
-      // অর্ডার সফল হলে কার্ট ক্লিয়ার করে সাকসেস পেজে পাঠানো
       clearCart();
-      router.push(`/order-success?orderId=${data.id || 'success'}`);
 
-    } catch (err: any) {
-      setError(err.message);
+      router.push(
+        `/order-success?success=1&items=${totalItems}&amount=${subtotal}`
+      );
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to place order. Please try again.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -83,10 +100,21 @@ export default function CheckoutPage() {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center bg-[#faf9f6]">
-        <h2 className="font-serif text-3xl text-gray-900 mb-4">Your Cart is Empty</h2>
-        <p className="text-sm text-gray-500 mb-8">Please add items to your cart before checking out.</p>
-        <Link href="/" className="text-xs tracking-[0.2em] uppercase border-b border-gray-900 pb-1 hover:text-[#8b5a2b] transition-colors">
+      <div className="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-center justify-center px-5 text-center">
+        <p className="text-[11px] uppercase tracking-[0.26em] text-[#8f7a68]">
+          Checkout
+        </p>
+        <h1 className="mt-4 font-serif text-5xl text-[#2d251f]">
+          Your cart is empty
+        </h1>
+        <p className="mt-4 max-w-md text-sm leading-7 text-[#6e5d4f]">
+          Add products to your cart before proceeding to checkout.
+        </p>
+
+        <Link
+          href="/"
+          className="mt-8 rounded-full bg-[#2d251f] px-7 py-4 text-xs uppercase tracking-[0.2em] text-white transition hover:bg-[#8b6b4f]"
+        >
           Return to Shop
         </Link>
       </div>
@@ -94,92 +122,197 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f6] py-24 px-6 md:px-12 lg:px-24">
-      <div className="max-w-[1200px] mx-auto">
-        <h1 className="font-serif text-4xl text-gray-900 mb-12 tracking-wide text-center md:text-left">
-          Checkout
-        </h1>
+    <div className="mx-auto max-w-7xl px-5 py-12 md:px-8 lg:py-16">
+      <div className="mb-10">
+        <p className="text-[11px] uppercase tracking-[0.26em] text-[#8f7a68]">
+          Secure Checkout
+        </p>
+        <h1 className="mt-4 font-serif text-5xl text-[#2d251f]">Checkout</h1>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-          {/* Form Section */}
-          <div className="lg:col-span-7">
-            <form onSubmit={handlePlaceOrder} className="space-y-8">
-              <div className="bg-white p-8 border border-gray-100 shadow-sm">
-                <h2 className="font-serif text-2xl mb-6 text-gray-900">Shipping Information</h2>
-                
-                <div className="space-y-5">
+      <div className="grid gap-10 lg:grid-cols-12">
+        {/* LEFT: FORM */}
+        <div className="lg:col-span-7">
+          <form onSubmit={handlePlaceOrder} className="space-y-8">
+            {/* Shipping */}
+            <div className="rounded-[32px] border border-[#eadfce] bg-white p-6 shadow-sm md:p-8">
+              <h2 className="font-serif text-3xl text-[#2d251f]">
+                Shipping Information
+              </h2>
+
+              <div className="mt-8 space-y-5">
+                <div>
+                  <label className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-[#8f7a68]">
+                    Full Name
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Sabbir Hossen"
+                    className="w-full rounded-2xl border border-[#e5d9cc] bg-[#faf7f2] px-4 py-4 text-sm text-[#2d251f] outline-none transition focus:border-[#b89c80]"
+                  />
+                </div>
+
+                <div className="grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className="block text-[11px] uppercase tracking-[0.1em] text-gray-500 mb-2">Full Name</label>
-                    <input required type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full bg-[#faf9f6] border border-gray-200 px-4 py-3 text-sm focus:border-gray-900 focus:outline-none transition-colors" placeholder="e.g. John Doe" />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-[11px] uppercase tracking-[0.1em] text-gray-500 mb-2">Email</label>
-                      <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full bg-[#faf9f6] border border-gray-200 px-4 py-3 text-sm focus:border-gray-900 focus:outline-none transition-colors" placeholder="john@example.com" />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] uppercase tracking-[0.1em] text-gray-500 mb-2">Phone Number</label>
-                      <input required type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full bg-[#faf9f6] border border-gray-200 px-4 py-3 text-sm focus:border-gray-900 focus:outline-none transition-colors" placeholder="+880 1XXX XXXXXX" />
-                    </div>
+                    <label className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-[#8f7a68]">
+                      Phone Number
+                    </label>
+                    <input
+                      required
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="+880 1XXX XXXXXX"
+                      className="w-full rounded-2xl border border-[#e5d9cc] bg-[#faf7f2] px-4 py-4 text-sm text-[#2d251f] outline-none transition focus:border-[#b89c80]"
+                    />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] uppercase tracking-[0.1em] text-gray-500 mb-2">Full Address</label>
-                    <textarea required name="address" value={formData.address} onChange={handleInputChange} rows={3} className="w-full bg-[#faf9f6] border border-gray-200 px-4 py-3 text-sm focus:border-gray-900 focus:outline-none transition-colors resize-none" placeholder="House/Apartment, Street, Area, City" />
+                    <label className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-[#8f7a68]">
+                      Email (Optional)
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email || ""}
+                      onChange={handleInputChange}
+                      placeholder="hello@example.com"
+                      className="w-full rounded-2xl border border-[#e5d9cc] bg-[#faf7f2] px-4 py-4 text-sm text-[#2d251f] outline-none transition focus:border-[#b89c80]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-[#8f7a68]">
+                    Full Address
+                  </label>
+                  <textarea
+                    required
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    rows={4}
+                    placeholder="House/Apartment, Road, Area, City"
+                    className="w-full resize-none rounded-2xl border border-[#e5d9cc] bg-[#faf7f2] px-4 py-4 text-sm text-[#2d251f] outline-none transition focus:border-[#b89c80]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="rounded-[32px] border border-[#eadfce] bg-white p-6 shadow-sm md:p-8">
+              <h2 className="font-serif text-3xl text-[#2d251f]">
+                Payment Method
+              </h2>
+
+              <div className="mt-6 rounded-[24px] border border-[#e7dccf] bg-[#faf7f2] p-5">
+                <div className="flex items-start gap-4">
+                  <div className="mt-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#2d251f]">
+                    <div className="h-2.5 w-2.5 rounded-full bg-[#2d251f]" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium text-[#2d251f]">
+                      Cash on Delivery
+                    </h3>
+                    <p className="mt-2 text-sm leading-7 text-[#6e5d4f]">
+                      Pay in cash when your order is delivered to your address.
+                    </p>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {error && <div className="p-4 bg-red-50 text-red-600 text-sm border border-red-100">{error}</div>}
+            {error ? (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
+                {error}
+              </div>
+            ) : null}
 
-              <button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full bg-[#1a1a1a] text-white py-5 text-xs tracking-[0.2em] uppercase hover:bg-[#8b5a2b] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Processing Order..." : "Place Order"}
-              </button>
-            </form>
-          </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-full bg-[#2d251f] px-7 py-5 text-xs uppercase tracking-[0.2em] text-white transition hover:bg-[#8b6b4f] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoading ? "Processing Order..." : "Place Order"}
+            </button>
+          </form>
+        </div>
 
-          {/* Order Summary Sidebar */}
-          <div className="lg:col-span-5">
-            <div className="bg-white p-8 border border-gray-100 shadow-sm sticky top-28">
-              <h2 className="font-serif text-2xl mb-8 text-gray-900">Order Summary</h2>
-              
-              <div className="space-y-6 mb-8 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
-                {cart.map((item) => {
-                   const price = typeof item.price === "string" ? parseFloat(item.price) : item.price;
-                   return (
-                    <div key={item.id} className="flex gap-4">
-                      <div className="w-16 h-20 bg-gray-100 flex-shrink-0">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 text-sm">
-                        <h3 className="font-serif text-gray-900 line-clamp-1">{item.name}</h3>
-                        <p className="text-gray-500 text-xs mt-1">Qty: {item.quantity}</p>
-                        <p className="text-gray-900 mt-1">৳{(price * item.quantity).toLocaleString("en-IN")}</p>
-                      </div>
+        {/* RIGHT: SUMMARY */}
+        <div className="lg:col-span-5">
+          <div className="sticky top-28 rounded-[32px] border border-[#eadfce] bg-white p-6 shadow-sm">
+            <h2 className="font-serif text-3xl text-[#2d251f]">
+              Order Summary
+            </h2>
+
+            <div className="mt-8 max-h-[420px] space-y-5 overflow-y-auto pr-1">
+              {cart.map((item) => {
+                const price =
+                  typeof item.price === "string"
+                    ? parseFloat(item.price)
+                    : item.price;
+
+                return (
+                  <div
+                    key={item.id}
+                    className="flex gap-4 rounded-[22px] border border-[#f1e8de] bg-[#fffdfa] p-3"
+                  >
+                    <div className="h-20 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-[#f5eee6]">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
                     </div>
-                   );
-                })}
+
+                    <div className="flex-1">
+                      <h3 className="font-serif text-xl leading-tight text-[#2d251f]">
+                        {item.name}
+                      </h3>
+                      <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[#8f7a68]">
+                        Qty: {item.quantity}
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-[#2d251f]">
+                        {formatCurrency(price * item.quantity)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 space-y-4 border-t border-[#f0e7dc] pt-6 text-sm text-[#6e5d4f]">
+              <div className="flex items-center justify-between">
+                <span>Items</span>
+                <span>{totalItems}</span>
               </div>
 
-              <div className="border-t border-gray-100 pt-6 space-y-4 text-sm text-gray-600 tracking-wide">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>৳{subtotal.toLocaleString("en-IN")}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Shipping Delivery</span>
-                  <span>Free (Promo)</span>
-                </div>
-                <div className="flex justify-between text-lg text-gray-900 font-medium pt-4 border-t border-gray-100">
-                  <span>Total</span>
-                  <span>৳{subtotal.toLocaleString("en-IN")}</span>
-                </div>
+              <div className="flex items-center justify-between">
+                <span>Subtotal</span>
+                <span>{formatCurrency(subtotal)}</span>
               </div>
+
+              <div className="flex items-center justify-between">
+                <span>Payment</span>
+                <span>Cash on Delivery</span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-between border-t border-[#f0e7dc] pt-6">
+              <p className="text-sm uppercase tracking-[0.16em] text-[#8f7a68]">
+                Total
+              </p>
+              <p className="text-2xl font-medium text-[#2d251f]">
+                {formatCurrency(subtotal)}
+              </p>
             </div>
           </div>
         </div>

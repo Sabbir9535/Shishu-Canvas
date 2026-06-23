@@ -1,19 +1,12 @@
-import Categories from "@/components/Categories";
-import FeaturedProducts from "@/components/FeaturedProducts";
-import Hero from "@/components/Hero";
-import NewArrivals from "@/components/NewArrivals";
-import Reviews from "@/components/Reviews";
-import TrustBar from "@/components/TrustBar";
+import FeaturedProducts from "@/components/home/FeaturedProducts";
+import { getProducts } from "@/lib/api";
 
-export default function Home() {
+export default async function HomePage() {
+  const products = await getProducts();
+
   return (
-    <>
-     <Hero/>
-     <TrustBar/>
-     <FeaturedProducts/>
-     <NewArrivals/>
-     <Categories/>
-     <Reviews/>
-    </>
+    <main>
+      <FeaturedProducts products={products} />
+    </main>
   );
 }
