@@ -75,7 +75,7 @@ export default function CheckoutPage() {
             phone: formData.phone,
             address: formData.address,
             quantity: item.quantity,
-            status: "pending",
+
           })
         )
       );

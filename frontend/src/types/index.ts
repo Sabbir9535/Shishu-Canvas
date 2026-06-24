@@ -17,7 +17,7 @@ export type Order = {
   phone: string;
   address: string;
   quantity: number;
-  status: OrderStatus;
+  status?: OrderStatus;
   created_at?: string;
 };
 
