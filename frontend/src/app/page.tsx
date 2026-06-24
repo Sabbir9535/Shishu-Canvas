@@ -1,4 +1,5 @@
 import FeaturedProducts from "@/components/home/FeaturedProducts";
+import Hero from "@/components/home/Hero";
 import { getProducts } from "@/lib/api";
 
 export default async function HomePage() {
@@ -6,6 +7,7 @@ export default async function HomePage() {
 
   return (
     <main>
+      <Hero/>
       <FeaturedProducts products={products} />
     </main>
   );
