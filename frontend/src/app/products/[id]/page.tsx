@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getProductById } from "@/lib/api";
 import { Product } from "@/types";
 import { formatCurrency } from "@/lib/format";
 import { useCartStore } from "@/store/useCartStore";
+import { ArrowLeft, ShoppingBag, Zap, ShieldCheck, Leaf } from "lucide-react";
 
 export default function ProductDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const productId = params?.id;
 
   const addToCart = useCartStore((state) => state.addToCart);
@@ -43,141 +45,189 @@ export default function ProductDetailsPage() {
     loadProduct();
   }, [productId]);
 
+  const isOutOfStock = product ? product.stock <= 0 : true;
+
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product || isOutOfStock) return;
     addToCart(product, quantity);
   };
 
+  const handleBuyNow = () => {
+    if (!product || isOutOfStock) return;
+    addToCart(product, quantity);
+    router.push("/checkout");
+  };
+
+  // 1. Loading State (Dark Theme Skeleton)
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-5 py-16 md:px-8">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div className="aspect-[4/5] animate-pulse rounded-[32px] bg-[#eee4d8]" />
-          <div className="space-y-5">
-            <div className="h-8 w-40 animate-pulse rounded bg-[#eee4d8]" />
-            <div className="h-16 w-full animate-pulse rounded bg-[#eee4d8]" />
-            <div className="h-28 w-full animate-pulse rounded bg-[#eee4d8]" />
+      <div className="min-h-screen bg-[#121517] px-6 py-32 md:px-12">
+        <div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-12 lg:gap-20">
+          <div className="aspect-[4/5] animate-pulse rounded-t-full rounded-b-[40px] bg-white/5 lg:col-span-5" />
+          <div className="space-y-6 pt-10 lg:col-span-7">
+            <div className="h-6 w-32 animate-pulse rounded bg-white/5" />
+            <div className="h-16 w-3/4 animate-pulse rounded bg-white/5" />
+            <div className="h-8 w-40 animate-pulse rounded bg-white/5" />
+            <div className="mt-12 h-32 w-full animate-pulse rounded bg-white/5" />
           </div>
         </div>
       </div>
     );
   }
 
+  // 2. Error State
   if (pageError || !product) {
     return (
-      <div className="mx-auto max-w-4xl px-5 py-20 md:px-8">
-        <div className="rounded-[28px] border border-red-200 bg-red-50 px-6 py-10 text-center">
-          <h2 className="font-serif text-3xl text-red-700">
-            Product not found
-          </h2>
-          <p className="mt-3 text-sm text-red-600">
-            {pageError || "We could not load this product."}
+      <div className="flex min-h-screen items-center justify-center bg-[#121517] px-6 py-20">
+        <div className="rounded-[24px] border border-red-900/30 bg-red-950/20 px-8 py-16 text-center backdrop-blur-md">
+          <h2 className="font-serif text-3xl text-white">Product not found</h2>
+          <p className="mt-4 text-sm font-light text-white/60">
+            {pageError || "We could not load this product. It may have been removed."}
           </p>
           <Link
-            href="/"
-            className="mt-6 inline-flex rounded-full bg-[#2d251f] px-6 py-3 text-xs uppercase tracking-[0.2em] text-white"
+            href="/shop"
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-transparent px-8 py-3 text-[10px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-white hover:text-black"
           >
-            Back to shop
+            Back to Collection
           </Link>
         </div>
       </div>
     );
   }
 
+  // 3. Main Product Page
   return (
-    <div className="mx-auto max-w-7xl px-5 py-12 md:px-8 lg:py-16">
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="text-xs uppercase tracking-[0.2em] text-[#8b735d] transition hover:text-[#2d251f]"
-        >
-          ← Back to collection
-        </Link>
-      </div>
-
-      <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-        {/* Left image */}
-        <div className="overflow-hidden rounded-[36px] border border-[#eadfce] bg-white p-4 shadow-sm">
-          <div className="overflow-hidden rounded-[28px] bg-[#f5eee6]">
-            {product.image ? (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="h-[620px] w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-[620px] items-center justify-center text-[#9d8b7b]">
-                No image available
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen bg-[#121517] px-6 pb-24 pt-32 md:px-12">
+      <div className="mx-auto max-w-[1440px]">
+        
+        {/* Back Button */}
+        <div className="mb-12">
+          <Link
+            href="/shop"
+            className="group inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-white/60 transition-colors hover:text-white"
+          >
+            <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+            Back to Shop
+          </Link>
         </div>
 
-        {/* Right content */}
-        <div className="flex flex-col justify-center">
-          <p className="text-[11px] uppercase tracking-[0.26em] text-[#8f7a68]">
-            Boutique Collection
-          </p>
-
-          <h1 className="mt-4 font-serif text-4xl leading-tight text-[#2d251f] md:text-5xl">
-            {product.name}
-          </h1>
-
-          <p className="mt-5 text-2xl font-medium text-[#2d251f]">
-            {formatCurrency(product.price)}
-          </p>
-
-          <div className="mt-5 inline-flex w-fit rounded-full bg-[#f4ebe1] px-4 py-2 text-xs uppercase tracking-[0.18em] text-[#6e5d4f]">
-            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-20">
+          
+          {/* Left Column: Product Image (Arch Style to match Hero) */}
+          <div className="lg:col-span-5">
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-t-full rounded-b-[40px] border-[8px] border-white/5 bg-[#1a1f24] shadow-2xl">
+              {product.image ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-[11px] font-light uppercase tracking-widest text-white/40">
+                  No image available
+                </div>
+              )}
+              {/* Image Overlay Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent mix-blend-multiply"></div>
+            </div>
           </div>
 
-          <div className="mt-8 rounded-[28px] border border-[#eadfce] bg-white p-6">
-            <h2 className="font-serif text-2xl text-[#2d251f]">
-              Product Details
-            </h2>
-            <p className="mt-4 text-sm leading-8 text-[#6e5d4f]">
-              {product.description ||
-                "A thoughtfully selected premium product from our boutique baby collection."}
+          {/* Right Column: Product Details */}
+          <div className="flex flex-col justify-center py-6 lg:col-span-7">
+            
+            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-[#BFA07A]">
+              Premium Collection
             </p>
-          </div>
 
-          <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-end">
-            <div>
-              <label className="block text-[11px] uppercase tracking-[0.18em] text-[#8f7a68]">
-                Quantity
-              </label>
-              <div className="mt-3 flex items-center rounded-full border border-[#dccdbc] bg-white">
-                <button
-                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="px-5 py-3 text-lg text-[#2d251f]"
-                >
-                  -
-                </button>
-                <span className="min-w-12 text-center text-sm text-[#2d251f]">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() =>
-                    setQuantity((prev) =>
-                      product.stock > 0
-                        ? Math.min(product.stock, prev + 1)
-                        : prev + 1
-                    )
-                  }
-                  className="px-5 py-3 text-lg text-[#2d251f]"
-                >
-                  +
-                </button>
+            <h1 className="mb-6 font-serif text-4xl leading-[1.1] text-white md:text-5xl lg:text-6xl">
+              {product.name}
+            </h1>
+
+            <div className="mb-8 flex items-end gap-6 border-b border-white/10 pb-8">
+              <p className="text-3xl font-medium text-white">
+                {formatCurrency(product.price)}
+              </p>
+              <div className="mb-1 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-[9px] uppercase tracking-[0.2em] text-white/80">
+                {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
               </div>
             </div>
 
-            <button
-              onClick={handleAddToCart}
-              disabled={product.stock <= 0}
-              className="rounded-full bg-[#2d251f] px-8 py-4 text-xs uppercase tracking-[0.2em] text-white transition hover:bg-[#8b6b4f] disabled:cursor-not-allowed disabled:bg-[#c7b9ab]"
-            >
-              Add to Cart
-            </button>
+            {/* Description */}
+            <div className="mb-10">
+              <p className="max-w-2xl text-[14px] font-light leading-[1.9] text-white/70">
+                {product.description ||
+                  "A thoughtfully selected premium product from our boutique baby collection. Crafted with the utmost care to provide absolute comfort and timeless style for your little one."}
+              </p>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="mb-12 flex gap-8">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={18} className="text-[#BFA07A]" strokeWidth={1.5} />
+                <span className="text-[10px] uppercase tracking-[0.15em] text-white/60">Premium Quality</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Leaf size={18} className="text-[#BFA07A]" strokeWidth={1.5} />
+                <span className="text-[10px] uppercase tracking-[0.15em] text-white/60">Skin Safe</span>
+              </div>
+            </div>
+
+            {/* Action Area: Quantity & Buttons */}
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+              
+              {/* Quantity Selector */}
+              <div>
+                <label className="mb-3 block text-[10px] uppercase tracking-[0.2em] text-white/60">
+                  Quantity
+                </label>
+                <div className="flex h-14 items-center rounded-full border border-white/20 bg-white/5 px-2">
+                  <button
+                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                    className="flex h-10 w-10 items-center justify-center text-lg text-white/80 transition-colors hover:text-white"
+                  >
+                    -
+                  </button>
+                  <span className="min-w-[40px] text-center text-[13px] font-medium text-white">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setQuantity((prev) =>
+                        product.stock > 0
+                          ? Math.min(product.stock, prev + 1)
+                          : prev + 1
+                      )
+                    }
+                    className="flex h-10 w-10 items-center justify-center text-lg text-white/80 transition-colors hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  className="flex h-14 w-full items-center justify-center gap-3 rounded-full border border-white/20 bg-transparent text-[11px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ShoppingBag size={16} strokeWidth={1.5} />
+                  Add to Cart
+                </button>
+                
+                <button
+                  onClick={handleBuyNow}
+                  disabled={isOutOfStock}
+                  className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-white text-[11px] font-medium uppercase tracking-[0.2em] text-black transition-colors hover:bg-[#BFA07A] hover:text-white disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-white/50"
+                >
+                  <Zap size={16} className="fill-current" />
+                  Buy Now
+                </button>
+              </div>
+
+            </div>
+
           </div>
         </div>
       </div>
