@@ -1,76 +1,125 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Hero() {
+  // স্লাইডারের জন্য আপনার মেইন ইমেজগুলোর লিংক এখানে দিন
+  const sliderImages = [
+    "/hero-1.jpeg", 
+    "/hero-2.jpeg",
+    "/hero-4.jpeg",
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // অটো-স্লাইড লজিক (প্রতি ৩ সেকেন্ড পর পর স্লাইড পরিবর্তন হবে)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) =>
+        prevIndex === sliderImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 3000); 
+
+    return () => clearInterval(timer);
+  }, [sliderImages.length]);
+
   return (
-    <section className="overflow-hidden bg-[#f8f1e8]">
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 md:px-8 lg:grid-cols-2 lg:py-24">
-        {/* Left */}
-        <div className="max-w-2xl">
-          <p className="text-[11px] uppercase tracking-[0.32em] text-[#8f7a68]">
-            Shishu Canvas
-          </p>
-
-          <h1 className="mt-5 font-serif text-5xl leading-[1.02] text-[#2d251f] md:text-6xl lg:text-7xl">
-            Soft, timeless essentials for your little one.
-          </h1>
-
-          <p className="mt-6 max-w-xl text-base leading-8 text-[#6e5d4f] md:text-lg">
-            Discover premium baby outfits, accessories, and curated essentials
-            designed for comfort, softness, and a beautifully elevated everyday.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Link
-              href="#featured-products"
-              className="rounded-full bg-[#2d251f] px-7 py-4 text-xs uppercase tracking-[0.2em] text-white transition hover:bg-[#8b6b4f]"
+    <section className="mx-auto max-w-[1440px] bg-[#f4f4f4] p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 lg:flex-row">
+        
+        {/* Left Side: Main Auto-Sliding Banner */}
+        <div className="relative h-[200px] w-full overflow-hidden rounded-2xl sm:h-[350px] lg:h-[500px] lg:w-[75%]">
+          {sliderImages.map((src, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+              }`}
             >
-              Shop Collection
-            </Link>
-
-            <Link
-              href="/cart"
-              className="rounded-full border border-[#d8c9b9] bg-white px-7 py-4 text-xs uppercase tracking-[0.2em] text-[#4e4034] transition hover:bg-[#f4ece2]"
-            >
-              View Cart
-            </Link>
-          </div>
-
-          <div className="mt-10 grid max-w-lg grid-cols-3 gap-6 border-t border-[#e4d8ca] pt-8">
-            <div>
-              <p className="font-serif text-3xl text-[#2d251f]">100%</p>
-              <p className="mt-1 text-sm text-[#7d6b5d]">Soft comfort focus</p>
+              <Link href="#">
+                <Image
+                  src={src}
+                  alt={`Main Slider Image ${index + 1}`}
+                  fill
+                  priority={index === 0}
+                  sizes="(max-width: 1024px) 100vw, 75vw"
+                  className="object-cover"
+                />
+              </Link>
             </div>
-            <div>
-              <p className="font-serif text-3xl text-[#2d251f]">COD</p>
-              <p className="mt-1 text-sm text-[#7d6b5d]">Cash on delivery</p>
-            </div>
-            <div>
-              <p className="font-serif text-3xl text-[#2d251f]">Curated</p>
-              <p className="mt-1 text-sm text-[#7d6b5d]">Boutique quality</p>
-            </div>
+          ))}
+          
+          {/* Slider Indicators (Dots) - ঐচ্ছিক, চাইলে রিমুভ করতে পারেন */}
+          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+            {sliderImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`h-2 w-2 rounded-full transition-all ${
+                  index === currentIndex ? "w-6 bg-white" : "bg-white/50"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Right */}
-        <div className="relative">
-          <div className="relative overflow-hidden rounded-[36px] bg-white p-4 shadow-xl">
-            <div className="overflow-hidden rounded-[28px] bg-[#efe4d7]">
-              <img
-                src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=1200&q=80"
-                alt="Baby collection hero"
-                className="h-[540px] w-full object-cover"
+        {/* Right Side: Grid Banners */}
+        <div className="flex w-full flex-col gap-4 lg:w-[25%]">
+          
+          {/* Top 2 Banners: মোবাইলে পাশাপাশি (২ কলাম), ডেস্কটপে উপর-নিচ */}
+          <div className="grid grid-cols-2 gap-4 lg:flex lg:flex-col lg:gap-4">
+            
+            {/* Router Banner */}
+            <Link href="#" className="relative h-[120px] w-full overflow-hidden rounded-xl sm:h-[180px] lg:h-[155px]">
+              <Image
+                src="/sapce-1.jpeg"
+                alt="Router Banner"
+                fill
+                sizes="(max-width: 1024px) 50vw, 25vw"
+                className="object-cover transition-transform duration-300 hover:scale-105"
               />
-            </div>
+            </Link>
+
+            {/* Wardrobe Banner */}
+            <Link href="#" className="relative h-[120px] w-full overflow-hidden rounded-xl sm:h-[180px] lg:h-[155px]">
+              <Image
+                src="/sapce-2.jpeg"
+                alt="Wardrobe Banner"
+                fill
+                sizes="(max-width: 1024px) 50vw, 25vw"
+                className="object-cover transition-transform duration-300 hover:scale-105"
+              />
+            </Link>
           </div>
 
-          <div className="absolute -bottom-6 left-6 rounded-[24px] border border-[#eadfce] bg-white px-5 py-4 shadow-lg">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#8f7a68]">
-              Featured Edit
-            </p>
-            <p className="mt-2 font-serif text-2xl text-[#2d251f]">
-              New Arrival Collection
-            </p>
+          {/* Bottom 2 Small Banners: আপনার ডেস্কটপ স্ক্রিনশট অনুযায়ী নিচে ২টি ছোট ব্যানার */}
+          <div className="hidden grid-cols-2 gap-4 lg:grid lg:h-[155px]">
+            {/* Small Banner 1 (e.g. Bike) */}
+            <Link href="#" className="relative h-full w-full overflow-hidden rounded-xl">
+              <Image
+                src="/specification-1.jpeg"
+                alt="Small Banner 1"
+                fill
+                sizes="12vw"
+                className="object-cover transition-transform duration-300 hover:scale-105"
+              />
+            </Link>
+
+            {/* Small Banner 2 (e.g. Call Center) */}
+            <Link href="#" className="relative h-full w-full overflow-hidden rounded-xl">
+              <Image
+                src="/spacificaton.jpeg"
+                alt="Small Banner 2"
+                fill
+                sizes="12vw"
+                className="object-cover transition-transform duration-300 hover:scale-105"
+              />
+            </Link>
           </div>
+          
         </div>
       </div>
     </section>

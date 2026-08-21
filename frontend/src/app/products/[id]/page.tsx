@@ -62,8 +62,8 @@ export default function ProductDetailsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#121517] px-6 py-32 md:px-12">
-        <div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-12 lg:gap-20">
-          <div className="aspect-[4/5] animate-pulse rounded-t-full rounded-b-[40px] bg-white/5 lg:col-span-5" />
+        <div className="mx-auto grid max-w-360 gap-12 lg:grid-cols-12 lg:gap-20">
+          <div className="aspect-4/5 animate-pulse rounded-t-full rounded-b-[40px] bg-white/5 lg:col-span-5" />
           <div className="space-y-6 pt-10 lg:col-span-7">
             <div className="h-6 w-32 animate-pulse rounded bg-white/5" />
             <div className="h-16 w-3/4 animate-pulse rounded bg-white/5" />
@@ -79,7 +79,7 @@ export default function ProductDetailsPage() {
   if (pageError || !product) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#121517] px-6 py-20">
-        <div className="rounded-[24px] border border-red-900/30 bg-red-950/20 px-8 py-16 text-center backdrop-blur-md">
+        <div className="rounded-3xl border border-red-900/30 bg-red-950/20 px-8 py-16 text-center backdrop-blur-md">
           <h2 className="font-serif text-3xl text-white">Product not found</h2>
           <p className="mt-4 text-sm font-light text-white/60">
             {pageError || "We could not load this product. It may have been removed."}
@@ -98,7 +98,7 @@ export default function ProductDetailsPage() {
   // 3. Main Product Page
   return (
     <div className="min-h-screen bg-[#121517] px-6 pb-24 pt-32 md:px-12">
-      <div className="mx-auto max-w-[1440px]">
+      <div className="mx-auto max-w-360">
         
         {/* Back Button */}
         <div className="mb-12">
@@ -115,7 +115,7 @@ export default function ProductDetailsPage() {
           
           {/* Left Column: Product Image (Arch Style to match Hero) */}
           <div className="lg:col-span-5">
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-t-full rounded-b-[40px] border-[8px] border-white/5 bg-[#1a1f24] shadow-2xl">
+            <div className="relative aspect-4/5 w-full overflow-hidden rounded-t-full rounded-b-[40px] border-8 border-white/5 bg-[#1a1f24] shadow-2xl">
               {product.image ? (
                 <img
                   src={product.image}
@@ -128,7 +128,7 @@ export default function ProductDetailsPage() {
                 </div>
               )}
               {/* Image Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent mix-blend-multiply"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent mix-blend-multiply"></div>
             </div>
           </div>
 
@@ -187,7 +187,7 @@ export default function ProductDetailsPage() {
                   >
                     -
                   </button>
-                  <span className="min-w-[40px] text-center text-[13px] font-medium text-white">
+                  <span className="min-w-10 text-center text-[13px] font-medium text-white">
                     {quantity}
                   </span>
                   <button
