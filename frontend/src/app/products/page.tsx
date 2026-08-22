@@ -30,7 +30,7 @@ export default function ProductsPage() {
 
   return (
     // Navbar-এর জন্য pt-[130px] বা pt-[150px] যোগ করা হয়েছে
-    <section className="bg-[#faf7f2] px-4 pb-16 pt-[130px] md:px-8 lg:pb-28 lg:pt-[160px]">
+    <section className="bg-[#faf7f2] px-4 pb-16 pt-8 md:px-8 lg:pb-28 lg:pt-[160px]">
       <div className="mx-auto max-w-[1440px]">
         
         {/* 🌟 Ultra-Premium Centered Header */}
