@@ -64,13 +64,6 @@ function OrderSuccessContent() {
         >
           Continue Shopping
         </Link>
-
-        <Link
-          href="/admin"
-          className="inline-flex items-center justify-center rounded-full border border-[#dccdbc] bg-[#faf7f2] px-7 py-4 text-xs uppercase tracking-[0.2em] text-[#5e4c3d] transition hover:bg-[#f5eee6]"
-        >
-          View Admin Panel
-        </Link>
       </div>
     </div>
   );

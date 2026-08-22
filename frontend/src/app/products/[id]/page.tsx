@@ -7,7 +7,7 @@ import { getProductById } from "@/lib/api";
 import { Product } from "@/types";
 import { formatCurrency } from "@/lib/format";
 import { useCartStore } from "@/store/useCartStore";
-import { ArrowLeft, ShoppingBag, Zap, ShieldCheck, Leaf } from "lucide-react";
+import { ArrowLeft, ShoppingBag, Zap, ShieldCheck, Leaf, Plus, Minus } from "lucide-react";
 
 export default function ProductDetailsPage() {
   const params = useParams();
@@ -58,35 +58,35 @@ export default function ProductDetailsPage() {
     router.push("/checkout");
   };
 
-  // 1. Loading State (Dark Theme Skeleton)
+  // 1. Loading State (Premium Light Theme Skeleton)
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#121517] px-6 py-32 md:px-12">
-        <div className="mx-auto grid max-w-360 gap-12 lg:grid-cols-12 lg:gap-20">
-          <div className="aspect-4/5 animate-pulse rounded-t-full rounded-b-[40px] bg-white/5 lg:col-span-5" />
-          <div className="space-y-6 pt-10 lg:col-span-7">
-            <div className="h-6 w-32 animate-pulse rounded bg-white/5" />
-            <div className="h-16 w-3/4 animate-pulse rounded bg-white/5" />
-            <div className="h-8 w-40 animate-pulse rounded bg-white/5" />
-            <div className="mt-12 h-32 w-full animate-pulse rounded bg-white/5" />
+      <div className="min-h-screen bg-[#faf7f2] px-5 pb-24 pt-[120px] md:px-8 md:pt-[150px]">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="aspect-[4/5] w-full animate-pulse rounded-md bg-[#e8dfd3]" />
+          <div className="space-y-6 pt-10">
+            <div className="h-4 w-32 animate-pulse rounded bg-[#e8dfd3]" />
+            <div className="h-12 w-3/4 animate-pulse rounded bg-[#e8dfd3]" />
+            <div className="h-8 w-40 animate-pulse rounded bg-[#e8dfd3]" />
+            <div className="mt-12 h-32 w-full animate-pulse rounded bg-[#e8dfd3]" />
           </div>
         </div>
       </div>
     );
   }
 
-  // 2. Error State
+  // 2. Error State (Minimalist)
   if (pageError || !product) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#121517] px-6 py-20">
-        <div className="rounded-3xl border border-red-900/30 bg-red-950/20 px-8 py-16 text-center backdrop-blur-md">
-          <h2 className="font-serif text-3xl text-white">Product not found</h2>
-          <p className="mt-4 text-sm font-light text-white/60">
+      <div className="flex min-h-screen items-center justify-center bg-[#faf7f2] px-5 pt-[120px]">
+        <div className="rounded-lg border border-[#e8dfd3] bg-white px-8 py-16 text-center shadow-sm">
+          <h2 className="font-serif text-3xl text-[#2d251f]">Product not found</h2>
+          <p className="mt-4 text-sm text-[#7d6b5d]">
             {pageError || "We could not load this product. It may have been removed."}
           </p>
           <Link
-            href="/shop"
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-transparent px-8 py-3 text-[10px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-white hover:text-black"
+            href="/products"
+            className="mt-8 inline-flex items-center justify-center rounded bg-[#2d251f] px-8 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-white transition hover:bg-[#4a3f35]"
           >
             Back to Collection
           </Link>
@@ -97,97 +97,95 @@ export default function ProductDetailsPage() {
 
   // 3. Main Product Page
   return (
-    <div className="min-h-screen bg-[#121517] px-6 pb-24 pt-32 md:px-12">
-      <div className="mx-auto max-w-360">
+    <div className="min-h-screen bg-[#faf7f2] px-4 pb-24 pt-[110px] md:px-8 md:pt-[150px]">
+      <div className="mx-auto max-w-7xl">
         
         {/* Back Button */}
-        <div className="mb-12">
+        <div className="mb-8 md:mb-12">
           <Link
-            href="/shop"
-            className="group inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-white/60 transition-colors hover:text-white"
+            href="/products"
+            className="group inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#7d6b5d] transition-colors hover:text-[#2d251f]"
           >
             <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
             Back to Shop
           </Link>
         </div>
 
-        <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-20">
+        <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-20">
           
-          {/* Left Column: Product Image (Arch Style to match Hero) */}
-          <div className="lg:col-span-5">
-            <div className="relative aspect-4/5 w-full overflow-hidden rounded-t-full rounded-b-[40px] border-8 border-white/5 bg-[#1a1f24] shadow-2xl">
+          {/* Left Column: Product Image */}
+          <div className="w-full">
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-[#f5eee6] shadow-sm">
               {product.image ? (
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-[11px] font-light uppercase tracking-widest text-white/40">
+                <div className="flex h-full items-center justify-center text-[11px] uppercase tracking-widest text-[#9d8b7b]">
                   No image available
                 </div>
               )}
-              {/* Image Overlay Gradient */}
-              <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent mix-blend-multiply"></div>
             </div>
           </div>
 
           {/* Right Column: Product Details */}
-          <div className="flex flex-col justify-center py-6 lg:col-span-7">
+          <div className="flex flex-col justify-center py-4 md:py-6 lg:py-10">
             
-            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-[#BFA07A]">
+            <p className="mb-3 text-[10px] uppercase tracking-[0.25em] text-[#7d6b5d]">
               Premium Collection
             </p>
 
-            <h1 className="mb-6 font-serif text-4xl leading-[1.1] text-white md:text-5xl lg:text-6xl">
+            <h1 className="mb-4 font-serif text-3xl leading-[1.2] text-[#2d251f] md:mb-6 md:text-5xl lg:text-6xl">
               {product.name}
             </h1>
 
-            <div className="mb-8 flex items-end gap-6 border-b border-white/10 pb-8">
-              <p className="text-3xl font-medium text-white">
+            <div className="mb-6 flex items-end gap-5 border-b border-[#e8dfd3] pb-6 md:mb-8 md:pb-8">
+              <p className="text-2xl font-medium text-[#2d251f] md:text-3xl">
                 {formatCurrency(product.price)}
               </p>
-              <div className="mb-1 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-[9px] uppercase tracking-[0.2em] text-white/80">
+              <div className="mb-1 rounded-full border border-[#d2c5b8] bg-white px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#7d6b5d] md:px-4 md:py-1.5">
                 {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
               </div>
             </div>
 
             {/* Description */}
-            <div className="mb-10">
-              <p className="max-w-2xl text-[14px] font-light leading-[1.9] text-white/70">
+            <div className="mb-8 md:mb-10">
+              <p className="max-w-2xl text-sm leading-relaxed text-[#7d6b5d] md:text-base md:leading-[1.9]">
                 {product.description ||
-                  "A thoughtfully selected premium product from our boutique baby collection. Crafted with the utmost care to provide absolute comfort and timeless style for your little one."}
+                  "A thoughtfully selected premium product from our boutique collection. Crafted with the utmost care to provide absolute comfort and timeless style."}
               </p>
             </div>
 
             {/* Trust Badges */}
-            <div className="mb-12 flex gap-8">
+            <div className="mb-10 flex gap-6 md:mb-12 md:gap-8">
               <div className="flex items-center gap-2">
-                <ShieldCheck size={18} className="text-[#BFA07A]" strokeWidth={1.5} />
-                <span className="text-[10px] uppercase tracking-[0.15em] text-white/60">Premium Quality</span>
+                <ShieldCheck size={18} className="text-[#2d251f]" strokeWidth={1.5} />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#7d6b5d]">Premium Quality</span>
               </div>
               <div className="flex items-center gap-2">
-                <Leaf size={18} className="text-[#BFA07A]" strokeWidth={1.5} />
-                <span className="text-[10px] uppercase tracking-[0.15em] text-white/60">Skin Safe</span>
+                <Leaf size={18} className="text-[#2d251f]" strokeWidth={1.5} />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#7d6b5d]">Eco-Friendly</span>
               </div>
             </div>
 
             {/* Action Area: Quantity & Buttons */}
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+            <div className="flex flex-col gap-6 md:gap-8">
               
               {/* Quantity Selector */}
               <div>
-                <label className="mb-3 block text-[10px] uppercase tracking-[0.2em] text-white/60">
+                <label className="mb-3 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7d6b5d]">
                   Quantity
                 </label>
-                <div className="flex h-14 items-center rounded-full border border-white/20 bg-white/5 px-2">
+                <div className="inline-flex h-12 items-center gap-4 rounded-full border border-[#d2c5b8] bg-white px-4">
                   <button
                     onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                    className="flex h-10 w-10 items-center justify-center text-lg text-white/80 transition-colors hover:text-white"
+                    className="p-1 text-[#7d6b5d] transition hover:text-[#2d251f]"
                   >
-                    -
+                    <Minus size={16} strokeWidth={1.5} />
                   </button>
-                  <span className="min-w-10 text-center text-[13px] font-medium text-white">
+                  <span className="min-w-[1.5rem] text-center text-sm font-medium text-[#2d251f]">
                     {quantity}
                   </span>
                   <button
@@ -198,19 +196,19 @@ export default function ProductDetailsPage() {
                           : prev + 1
                       )
                     }
-                    className="flex h-10 w-10 items-center justify-center text-lg text-white/80 transition-colors hover:text-white"
+                    className="p-1 text-[#7d6b5d] transition hover:text-[#2d251f]"
                   >
-                    +
+                    <Plus size={16} strokeWidth={1.5} />
                   </button>
                 </div>
               </div>
 
               {/* Buttons */}
-              <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <button
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
-                  className="flex h-14 w-full items-center justify-center gap-3 rounded-full border border-white/20 bg-transparent text-[11px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-14 w-full items-center justify-center gap-3 rounded border border-[#2d251f] bg-transparent text-[11px] font-semibold uppercase tracking-[0.2em] text-[#2d251f] transition-all hover:bg-[#2d251f] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ShoppingBag size={16} strokeWidth={1.5} />
                   Add to Cart
@@ -219,7 +217,7 @@ export default function ProductDetailsPage() {
                 <button
                   onClick={handleBuyNow}
                   disabled={isOutOfStock}
-                  className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-white text-[11px] font-medium uppercase tracking-[0.2em] text-black transition-colors hover:bg-[#BFA07A] hover:text-white disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-white/50"
+                  className="flex h-14 w-full items-center justify-center gap-3 rounded bg-[#2d251f] text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-all hover:bg-[#4a3f35] disabled:cursor-not-allowed disabled:bg-[#d2c5b8] disabled:text-[#faf7f2]"
                 >
                   <Zap size={16} className="fill-current" />
                   Buy Now

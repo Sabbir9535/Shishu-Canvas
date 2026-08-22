@@ -61,8 +61,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Details Section */}
       <div className="flex flex-1 flex-col p-3 sm:p-4 md:p-5">
-      
-
         {/* Title */}
         <Link href={`/products/${product.id}`}>
           <h3 className="mb-1 line-clamp-2 font-serif text-[13px] leading-snug text-[#4a3f35] transition-colors hover:text-[#8a7b6c] sm:text-[15px]">

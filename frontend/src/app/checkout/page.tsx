@@ -151,7 +151,7 @@ export default function CheckoutPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="e.g. Sabbir Hossen"
+                    placeholder="Enter your name..."
                     className="w-full rounded-2xl border border-[#e5d9cc] bg-[#faf7f2] px-4 py-4 text-sm text-[#2d251f] outline-none transition focus:border-[#b89c80]"
                   />
                 </div>

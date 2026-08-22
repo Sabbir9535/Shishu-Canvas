@@ -31,7 +31,7 @@ export default function RootLayout({
         className={`${jost.variable} ${cormorant.variable} bg-[#faf7f2] text-[#2d251f] antialiased`}
       >
         <Navbar />
-        <main className="min-h-screen pt-23">{children}</main>
+        <main className="min-h-screen  pt-40 ">{children}</main>
         <Footer />
       </body>
     </html>

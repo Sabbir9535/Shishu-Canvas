@@ -20,7 +20,6 @@ export default function Footer() {
             <Link href="/">Home</Link>
             <Link href="/cart">Cart</Link>
             <Link href="/checkout">Checkout</Link>
-            <Link href="/admin">Admin</Link>
           </div>
         </div>
 
@@ -30,7 +29,7 @@ export default function Footer() {
           </h4>
           <div className="mt-4 space-y-3 text-sm text-[#6e5d4f]">
             <p>Email: hello@shishucanvas.com</p>
-            <p>Phone: +880 1XXX XXXXXX</p>
+            <p>Phone: +880 1305054868</p>
             <p>Dhaka, Bangladesh</p>
           </div>
         </div>

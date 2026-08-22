@@ -26,7 +26,7 @@ export default function Hero() {
   }, [sliderImages.length]);
 
   return (
-    <section className="mx-auto max-w-[1440px] bg-[#f4f4f4] p-4 sm:p-6 lg:p-8">
+    <section className="mx-auto max-w-[1440px] bg-[#faf7f2] p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-4 lg:flex-row">
         
         {/* Left Side: Main Auto-Sliding Banner */}

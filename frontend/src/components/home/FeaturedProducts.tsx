@@ -45,7 +45,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
         {safeProducts.length > 0 && (
           <div className="mt-14 flex justify-center md:mt-20">
             <Link
-              href="/collections"
+              href="/products"
               className="group relative flex h-12 items-center justify-center overflow-hidden border border-[#d8c8b8] bg-transparent px-8 text-[11px] font-medium uppercase tracking-[0.25em] text-[#4a3f35] transition-all hover:border-[#4a3f35] sm:h-14 sm:px-10"
             >
               <span className="relative z-10 transition-colors group-hover:text-white">

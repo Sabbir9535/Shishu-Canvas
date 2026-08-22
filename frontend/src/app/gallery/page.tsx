@@ -4,58 +4,94 @@ import { useState } from "react";
 import Image from "next/image";
 
 // ডেমো গ্যালারি ইমেজের ডাটা (এখানে আপনার আসল প্রোডাক্টের ছবি দেবেন)
-const galleryItems = [
+export const galleryItems = [
   {
     id: 1,
-    src: "https://images.unsplash.com/photo-1522771930-78848d92871d?auto=format&fit=crop&w=800&q=80",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396527/Produts-10_202608192220_ceysnu.jpg",
     alt: "Premium baby clothing set",
-    category: "Clothing",
+    category: "baby-keeper",
   },
   {
     id: 2,
-    src: "https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&w=800&q=80",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396526/Produts-3_202608192219_ujil5y.jpg",
     alt: "Soft baby shoes",
-    category: "Accessories",
+    category: "baby-keeper",
   },
   {
     id: 3,
-    src: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=800&q=80",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396527/Produts-7_202608192219_q4oy4x.jpg",
     alt: "Wooden baby toys",
-    category: "Toys",
+    category: "baby-keeper",
   },
   {
     id: 4,
-    src: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800&q=80",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396527/Produts-8_202608192219_miaafg.jpg",
     alt: "Organic cotton onesie",
-    category: "Clothing",
+    category: "baby-keeper",
   },
   {
     id: 5,
-    src: "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=800&q=80",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396527/Produts-9_202608192219_umtnne.jpg",
     alt: "Nursery essentials",
-    category: "Nursery",
+    category: "baby-keeper",
   },
   {
     id: 6,
-    src: "https://images.unsplash.com/photo-1601288496920-b6154fe3626a?auto=format&fit=crop&w=800&q=80",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396525/produts-2_202608192219_rn4inj.jpg",
     alt: "Knitted baby blanket",
-    category: "Accessories",
+    category: "baby-keeper",
   },
   {
     id: 7,
-    src: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=800&q=80",
-    alt: "Baby grooming kit",
-    category: "Nursery",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396720/bibs-2_imnd5n.jpg",
+    alt: "Premium baby bibs design 2",
+    category: "bibs",
   },
   {
     id: 8,
-    src: "https://images.unsplash.com/photo-1610809235835-13b0a2bfce08?auto=format&fit=crop&w=800&q=80",
-    alt: "Soft plush toys",
-    category: "Toys",
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396721/bibs-1_s8gtqu.jpg",
+    alt: "Premium baby bibs design 1",
+    category: "bibs",
   },
+  {
+    id: 9,
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396721/bibs-5_miw1jb.jpg",
+    alt: "Premium baby bibs design 5",
+    category: "bibs",
+  },
+  {
+    id: 10,
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396721/bibs-4_crbllz.jpg",
+    alt: "Premium baby bibs design 4",
+    category: "bibs",
+  },
+  {
+    id: 11,
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396722/bibs-6_huymun.jpg",
+    alt: "Premium baby bibs design 6",
+    category: "bibs",
+  },
+  {
+    id: 12,
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396722/bibs-10_opcstm.jpg",
+    alt: "Premium baby bibs design 10",
+    category: "bibs",
+  },
+  {
+    id: 13,
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396722/bibs-9_af5xju.jpg",
+    alt: "Premium baby bibs design 9",
+    category: "bibs",
+  },
+  {
+    id: 14,
+    src: "https://res.cloudinary.com/djun95ruc/image/upload/v1787396722/bibs-8_e2ab5o.jpg", // .jpg.jpg ফিক্স করা হয়েছে
+    alt: "Premium baby bibs design 8",
+    category: "bibs",
+  }
 ];
 
-const categories = ["All", "Clothing", "Toys", "Accessories", "Nursery"];
+const categories = ["All", "baby-keeper", "bibs"];
 
 export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -66,21 +102,17 @@ export default function GalleryPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#faf7f2] pb-24 pt-32">
+    <main className="min-h-screen bg-[#faf7f2] pb-24 pt-8 sm:pt-32 md:pt-32 lg:pt-32">
       <div className="mx-auto max-w-[1440px] px-6 md:px-12">
         
         {/* Header Section */}
-        <div className="mb-16 text-center">
+        <div className="mb-8 text-center">
           <p className="mb-4 text-[11px] font-light uppercase tracking-[0.3em] text-[#8b735d]">
-            Curated Memories
+            Little Essentials
           </p>
           <h1 className="mb-6 font-serif text-4xl leading-tight text-[#2d251f] md:text-5xl lg:text-6xl">
-            Our <em className="font-light italic text-[#a48671]">Collection</em> Gallery
+           Discover Our <em className="font-light italic text-[#a48671]">Baby Collection</em>
           </h1>
-          <p className="mx-auto max-w-xl text-sm font-light leading-relaxed text-[#7d6b5d] md:text-base">
-            Explore our carefully selected range of premium baby outfits, 
-            accessories, and essentials. Designed for comfort and captured in their purest moments.
-          </p>
         </div>
 
         {/* Filter Navigation */}
@@ -101,7 +133,7 @@ export default function GalleryPage() {
         </div>
 
         {/* Masonry Image Grid */}
-        <div className="columns-1 gap-6 sm:columns-2 lg:columns-3 xl:columns-4">
+        <div className="columns-2 gap-6 sm:columns-2 lg:columns-3 xl:columns-4">
           {filteredItems.map((item) => (
             <div
               key={item.id}
